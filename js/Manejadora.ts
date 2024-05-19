@@ -20,6 +20,8 @@ namespace ModeloParcial{
             (<HTMLInputElement>document.getElementById('sueldo')).value = "";
             (<HTMLInputElement>document.getElementById('foto')).value = "";
             (<HTMLInputElement>document.getElementById('cboPerfiles')).value = "";
+            (<HTMLImageElement>document.getElementById("imgFoto")).src = '';
+
         }
 
         export async function AgregarUsuarioJSON(){
@@ -115,7 +117,7 @@ namespace ModeloParcial{
                 let data = await respuesta.json();
                 console.log(data);
                 alert(data.mensaje)
-                limpiarCampos();
+                limpiarCamposBD();
                 MostrarUsuariosBD();
             }
 
@@ -337,7 +339,48 @@ namespace ModeloParcial{
         }
 
         export async function ModificarEmpleado(){
+            const id = <HTMLInputElement>document.getElementById('id');
+            const nombre = <HTMLInputElement>document.getElementById('nombre');
+            const correo = <HTMLInputElement>document.getElementById('correo');
+            const clave = <HTMLInputElement>document.getElementById('clave');
+            const id_perfil = <HTMLSelectElement>document.getElementById('cboPerfiles');
+            const sueldo = <HTMLInputElement>document.getElementById('sueldo');
+            const fotoInput = <HTMLInputElement>document.getElementById('foto');
+            const foto = fotoInput.files ? fotoInput.files[0] : null;
 
+            const objSend = {
+                nombre:nombre.value,
+                correo:correo.value,
+                clave:clave.value,
+                id_perfil:id_perfil.value,
+                sueldo:sueldo.value
+            }
+            let formData = new FormData();
+            formData.append("empleado_json", JSON.stringify(objSend));
+            if(foto){
+                formData.append('foto',foto);
+            }else{
+                console.log("no carga la foto");
+            }
+
+            let respuesta = await fetch(`http://localhost:2024/empleadoBD/${id.value}`,{
+                method: 'PUT',
+                body:formData
+            })
+
+            if(respuesta.ok){
+                let data = await respuesta.json();
+                console.log(data);
+                if(data.exito === true){
+                    console.log(data.mensaje);
+                    alert("Usuario modificado exitosamente");
+                    MostrarEmpleados();
+                    limpiarCamposEmpleados();
+                }
+            }else{
+                alert("Error al modificar el empleado");
+                throw new Error("Error al modificar el empleado");
+            }
         }
 
         export async function EliminarEmpleado(usuario:any){

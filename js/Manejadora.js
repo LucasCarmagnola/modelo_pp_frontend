@@ -32,6 +32,7 @@ var ModeloParcial;
             document.getElementById('sueldo').value = "";
             document.getElementById('foto').value = "";
             document.getElementById('cboPerfiles').value = "";
+            document.getElementById("imgFoto").src = '';
         });
     }
     ModeloParcial.limpiarCamposEmpleados = limpiarCamposEmpleados;
@@ -126,7 +127,7 @@ var ModeloParcial;
                 let data = yield respuesta.json();
                 console.log(data);
                 alert(data.mensaje);
-                limpiarCampos();
+                limpiarCamposBD();
                 MostrarUsuariosBD();
             }
         });
@@ -334,6 +335,47 @@ var ModeloParcial;
     ModeloParcial.MostrarEmpleados = MostrarEmpleados;
     function ModificarEmpleado() {
         return __awaiter(this, void 0, void 0, function* () {
+            const id = document.getElementById('id');
+            const nombre = document.getElementById('nombre');
+            const correo = document.getElementById('correo');
+            const clave = document.getElementById('clave');
+            const id_perfil = document.getElementById('cboPerfiles');
+            const sueldo = document.getElementById('sueldo');
+            const fotoInput = document.getElementById('foto');
+            const foto = fotoInput.files ? fotoInput.files[0] : null;
+            const objSend = {
+                nombre: nombre.value,
+                correo: correo.value,
+                clave: clave.value,
+                id_perfil: id_perfil.value,
+                sueldo: sueldo.value
+            };
+            let formData = new FormData();
+            formData.append("empleado_json", JSON.stringify(objSend));
+            if (foto) {
+                formData.append('foto', foto);
+            }
+            else {
+                console.log("no carga la foto");
+            }
+            let respuesta = yield fetch(`http://localhost:2024/empleadoBD/${id.value}`, {
+                method: 'PUT',
+                body: formData
+            });
+            if (respuesta.ok) {
+                let data = yield respuesta.json();
+                console.log(data);
+                if (data.exito === true) {
+                    console.log(data.mensaje);
+                    alert("Usuario modificado exitosamente");
+                    MostrarEmpleados();
+                    limpiarCamposEmpleados();
+                }
+            }
+            else {
+                alert("Error al modificar el empleado");
+                throw new Error("Error al modificar el empleado");
+            }
         });
     }
     ModeloParcial.ModificarEmpleado = ModificarEmpleado;
